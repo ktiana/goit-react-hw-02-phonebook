@@ -1,16 +1,59 @@
-export const App = () => {
-  return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
-  );
-};
+import React, { Component } from 'react';
+import { nanoid } from 'nanoid';
+import { ContactForm } from './ContactForm/ContactForm';
+import { ContactList } from './ContactList/ContactList';
+import { ContactFilter } from './ContactFilter/ContactFilter';
+
+export class App extends Component {
+  state = {
+    contacts: [],
+    filter: '',
+  };
+
+  addContact = data => {
+    const contactInList = this.state.contacts.some(
+      contact => contact.name.toLowerCase() === data.name.toLowerCase()
+    );
+
+    if (contactInList) {
+      alert(`⚠ Oops... Contact ${data.name} already in list!`);
+      return;
+    }
+    const newContact = { ...data, id: nanoid() };
+    this.setState(prevState => ({
+      contacts: [...prevState.contacts, newContact],
+    }));
+  };
+
+  deleteContact = id => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(item => item.id !== id),
+    }));
+  };
+
+  handleChange = event => {
+    this.setState({ filter: event.target.value });
+  };
+
+  getFilterContact = () => {
+    return this.state.contacts.filter(contact =>
+      contact.name.toLowerCase().includes(this.state.filter.toLowerCase())
+    );
+  };
+  render() {
+    return (
+      <div>
+        <h1>Phonebook</h1>
+        <ContactForm handleSubmit={this.addContact} />
+        <ContactFilter
+          filter={this.state.filter}
+          handleChange={this.handleChange}
+        />
+        <ContactList
+          contacts={this.getFilterContact()}
+          deleteContact={this.deleteContact}
+        />
+      </div>
+    );
+  }
+}
